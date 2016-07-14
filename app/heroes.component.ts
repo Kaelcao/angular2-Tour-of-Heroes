@@ -9,12 +9,13 @@ import {Router} from "@angular/router";
     selector: 'my-heroes',
     directives: [HeroDetailComponent],
     templateUrl: 'app/heroes.component.html',
-    styleUrls: ["app/heroes.component.css"]
+    styleUrls: ["app/heroes.component.css"],
 })
 export class HeroesComponent implements OnInit {
-
+    addingHero:boolean;
     title:string = "Tour of Heroes";
     selectedHero:Hero;
+    error:any;
     heroes:Hero[];
 
     constructor(private heroService:HeroService,
@@ -32,8 +33,35 @@ export class HeroesComponent implements OnInit {
     ngOnInit():void {
         this.getHeroes();
     }
-    gotoDetail (){
-        let link = ['./detail',this.selectedHero.id];
+
+    gotoDetail() {
+        let link = ['./detail', this.selectedHero.id];
         this.router.navigate(link);
     }
+
+    addHero() {
+        this.addingHero = true;
+        this.selectedHero = null;
+    }
+
+    close(savedHero:Hero) {
+        this.addingHero = false;
+        if (savedHero) {
+            this.getHeroes();
+        }
+    }
+
+    deleteHero(hero:Hero, event:any) {
+        event.stopPropagation();
+        this.heroService
+            .delete(hero)
+            .then(res => {
+                this.heroes = this.heroes.filter(h => h !== hero);
+                if (this.selectedHero === hero) {
+                    this.selectedHero = null;
+                }
+            })
+            .catch(error => this.error = error);
+    }
+
 }
